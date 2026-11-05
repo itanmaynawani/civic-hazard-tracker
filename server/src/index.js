@@ -6,6 +6,8 @@ import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
 import mongoose from 'mongoose';
 import { connectDB } from './config/db.js';
+import { initSocket } from './socket.js';
+import reportRoutes from './routes/reports.js';
 
 const PORT = process.env.PORT || 5000;
 const CLIENT_ORIGINS = (process.env.CLIENT_ORIGIN || 'http://localhost:5173')
@@ -40,22 +42,25 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Routes will be mounted here in step 3:
-// app.use('/api/reports', reportRoutes);
+app.use('/api/reports', reportRoutes);
 
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-// Central error handler
+// Central error handler (Express 5 forwards errors from async handlers here automatically)
 app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(err.status || 500).json({ error: err.message || 'Server error' });
+  const status = err.status || 500;
+  if (status >= 500) console.error(err);
+  res.status(status).json({
+    error: status >= 500 ? 'Server error' : err.message,
+    ...(err.details && { details: err.details }),
+  });
 });
 
-// Using http.createServer (instead of app.listen) so Socket.IO can attach in step 3
 const server = http.createServer(app);
+initSocket(server, CLIENT_ORIGINS);
 
 async function start() {
   try {
