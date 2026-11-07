@@ -2,7 +2,7 @@
 
 A full-stack MERN app where residents map urban problems (potholes, flooding, broken streetlights, transit delays) on a live map. Reports are stored as GeoJSON in MongoDB, queried with geospatial operators, and pushed to every connected user in real time.
 
-**Live demo:** _add your deployed URL here_
+**Live demo:** (https://civic-hazard-tracker.vercel.app)
 **Note:** free hosting tiers can sleep when idle, so the first load may take 30 to 60 seconds.
 
 ## Features
